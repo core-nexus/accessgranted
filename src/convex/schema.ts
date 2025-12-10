@@ -29,12 +29,12 @@ export default defineSchema({
     isAnonymous: v.optional(v.boolean()),
 
     // Access Granted specific
-    subscriptionTier: v.union(
+    subscriptionTier: v.optional(v.union(
       v.literal('free'),
       v.literal('angel'), // $20
       v.literal('archangel'), // $50
       v.literal('principality') // $100
-    ),
+    )),
     subscriptionStatus: v.optional(v.string()), // 'active', 'past_due', etc.
     stripeCustomerId: v.optional(v.string()),
     // Admin flag (replaces "Keepers")

@@ -27,3 +27,6 @@ vite.config.ts.timestamp-*
 # Memory uploads (personal data)
 uploads/memories/*
 !uploads/memories/.gitkeep
+
+# Temporary files
+tmp/

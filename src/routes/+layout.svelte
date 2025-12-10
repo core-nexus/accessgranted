@@ -12,6 +12,7 @@
 
   // Authentication State
   // We'll use a local state to track if we've successfully authenticated/loaded
+  // Convex Reactivity: The viewer query should update when we setAuth.
   const viewer = useQuery(api.users.viewer, {})
 
   // Login Form State
@@ -31,25 +32,34 @@
     try {
       const step = isSignUp ? 'signUp' : 'signIn'
       // Call the Convex Auth action
-      await client.action(api.auth.signIn, {
-        provider: 'credentials',
-        // Ah, the import is `import Password from "@auth/core/providers/credentials"`.
-        // The ID of that provider is `credentials` unless overridden.
-        // Let's use what the error message suggested.
+      const result = await client.action(api.auth.signIn, {
+        provider: 'password', // Default ID for @convex-dev/auth Password provider
         params: {
           email,
           password,
           flow: step,
         },
       })
+      console.log('SignIn Result:', result)
       // If successful, the client should automatically pick up the new session?
       // Convex Auth typically handles token storage via cookies or local storage hooks.
       // If this is manual, we might need to handle the result.
       // Assuming standard setup, let's reload or wait for query update.
-      // But typically signIn returns { redirect? } or throws.
+      // But      console.log('SignIn Result:', result)
 
-      // For simplified flow:
-      window.location.reload()
+      // Handle manual token auth (required for cross-origin/SPA where cookies might not stick)
+      if (result.tokens && result.tokens.token) {
+        console.log('Setting auth token...')
+        await client.setAuth(() => Promise.resolve(result.tokens.token))
+        // Store in localStorage for persistence if needed, though Convex client handles in-memory
+        // But for page reloads we might need to persist it.
+        // Let's rely on client.setAuth for this session.
+        // isAuthenticated = true // Removed, relying on viewer query
+      }
+
+      // We don't need reload if we setAuth, the queries should react.
+      // But let's leave reload commented out.
+      // window.location.reload()
     } catch (err: any) {
       console.error('Auth error:', err)
       error = err.message || 'Authentication failed'
