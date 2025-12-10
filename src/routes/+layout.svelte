@@ -92,7 +92,10 @@
 </svelte:head>
 
 <div class="app-container">
-  {#if viewer.isLoading}
+  {#if isAuthenticated}
+    <!-- Authenticated App -->
+    <slot />
+  {:else if viewer.isLoading}
     <!-- Loading State -->
     <div class="loading-screen">
       <div class="sigil animate-pulse-glow">
@@ -104,9 +107,6 @@
       </div>
       <p class="loading-text">Initializing {APP_NAME}...</p>
     </div>
-  {:else if viewer.data}
-    <!-- Authenticated App -->
-    <slot />
   {:else}
     <!-- Auth Gate -->
     <div class="auth-gate">
