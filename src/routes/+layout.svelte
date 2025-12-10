@@ -14,6 +14,13 @@
   // We'll use a local state to track if we've successfully authenticated/loaded
   // Convex Reactivity: The viewer query should update when we setAuth.
   const viewer = useQuery(api.users.viewer, {})
+  let isAuthenticated = $state(false)
+
+  $effect(() => {
+    if (viewer.data) {
+      isAuthenticated = true
+    }
+  })
 
   // Login Form State
   let isSignUp = $state(false)
@@ -49,17 +56,15 @@
 
       // Handle manual token auth (required for cross-origin/SPA where cookies might not stick)
       if (result.tokens && result.tokens.token) {
-        console.log('Setting auth token...')
-        await client.setAuth(() => Promise.resolve(result.tokens.token))
-        // Store in localStorage for persistence if needed, though Convex client handles in-memory
-        // But for page reloads we might need to persist it.
-        // Let's rely on client.setAuth for this session.
-        // isAuthenticated = true // Removed, relying on viewer query
+        console.log('SignIn Result has token. Setting auth...')
+        const token = result.tokens.token
+        await client.setAuth(() => Promise.resolve(token))
+        console.log('Auth token set. Checking viewer...')
+        isAuthenticated = true // Force local state update for UI feedback
+      } else {
+        console.log('SignIn Result has NO token. attempting reload...')
+        window.location.reload()
       }
-
-      // We don't need reload if we setAuth, the queries should react.
-      // But let's leave reload commented out.
-      // window.location.reload()
     } catch (err: any) {
       console.error('Auth error:', err)
       error = err.message || 'Authentication failed'
