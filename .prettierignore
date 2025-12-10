@@ -1,0 +1,10 @@
+/.svelte-kit/
+/.wrangler/
+/build/
+/static/
+bun.lock
+bun.lockb
+package-lock.json
+pnpm-lock.yaml
+/src/convex/_generated/
+yarn.lock

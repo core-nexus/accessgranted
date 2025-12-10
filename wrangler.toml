@@ -1,0 +1,16 @@
+# ═══════════════════════════════════════════════════════════════════════════════
+# AETHERIA - Cloudflare Pages Configuration
+# ═══════════════════════════════════════════════════════════════════════════════
+#
+# This project is deployed to Cloudflare Pages with git integration.
+# Backend remains on Convex (https://precious-emu-772.convex.cloud)
+#
+# Deployment: Push to main → Cloudflare Pages auto-deploys
+
+name = "aetheria"
+compatibility_date = "2024-12-01"
+pages_build_output_dir = ".svelte-kit/cloudflare"
+
+# Environment variables
+[vars]
+PUBLIC_CONVEX_URL = "https://precious-emu-772.convex.cloud"

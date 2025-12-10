@@ -1,0 +1,40 @@
+#!/bin/sh
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# BULLETPROOF PRE-COMMIT HOOK
+# ═══════════════════════════════════════════════════════════════════════════════
+# This hook is designed to NEVER lose your work. It only runs checks on staged
+# files and never auto-modifies anything.
+#
+# If this hook fails, your commit is blocked but YOUR CHANGES ARE SAFE.
+# Simply fix the issues and commit again.
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# Exit immediately if any command fails
+set -e
+
+# Check if there are any staged changes (skip on empty commits)
+if git diff --cached --quiet; then
+    echo "✓ No staged changes, skipping pre-commit checks"
+    exit 0
+fi
+
+echo "🔍 Running pre-commit checks on staged files..."
+echo ""
+
+# Run lint-staged (only checks staged files, never modifies)
+# The --no-stash flag prevents lint-staged from stashing unstaged changes,
+# which is the #1 cause of lost work in pre-commit hooks.
+# Since we only use --check (not --write), there's no risk of data loss.
+# We filter out the misleading "Skipping backup" warning while preserving exit code.
+set +e
+output=$(npx lint-staged --no-stash 2>&1)
+exit_code=$?
+echo "$output" | grep -v "Skipping backup because"
+set -e
+if [ $exit_code -ne 0 ]; then
+    exit $exit_code
+fi
+
+echo ""
+echo "✓ All pre-commit checks passed!"

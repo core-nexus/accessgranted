@@ -1,0 +1,2 @@
+# Place your .docx, .md, or .txt files here for memory ingestion
+# Then run: npm run ingest ./uploads/memories/ --type dialogue --embed
