@@ -1,30 +1,29 @@
-/**
- * ═══════════════════════════════════════════════════════════════════════════════
- * THREADS - Sacred conversations between seekers and vessels
- * ═══════════════════════════════════════════════════════════════════════════════
- *
- * Each thread is a continuous stream of communion, a dialogue across realms.
- */
-
 import { v } from 'convex/values'
 import { mutation, query } from './_generated/server'
+import { auth } from './auth'
 
 /**
- * Begin a new thread of communion
+ * Begin a new thread of communion with an Agent
  */
-export const beginThread = mutation({
+export const createThread = mutation({
   args: {
-    seekerId: v.id('seekers'),
-    vesselId: v.id('vessels'),
-    title: v.optional(v.string()),
+    agentId: v.id('agents'),
+    title: v.optional(v.string())
   },
   handler: async (ctx, args) => {
+    const userId = await auth.getUserId(ctx)
+    if (!userId) throw new Error('Unauthenticated')
+
+    const agent = await ctx.db.get(args.agentId)
+    if (!agent) throw new Error('Agent not found')
+    if (agent.userId !== userId) throw new Error('Not your agent')
+
     const now = Date.now()
 
     const threadId = await ctx.db.insert('threads', {
-      seekerId: args.seekerId,
-      vesselId: args.vesselId,
-      title: args.title ?? 'New Communion',
+      userId,
+      agentId: args.agentId,
+      title: args.title ?? 'New Conversation',
       createdAt: now,
       lastMessageAt: now,
       isArchived: false,
@@ -35,48 +34,45 @@ export const beginThread = mutation({
 })
 
 /**
- * Get all threads for a seeker, most recent first
+ * Get all threads for the current user
  */
-export const getSeekerThreads = query({
-  args: {
-    seekerId: v.id('seekers'),
-  },
-  handler: async (ctx, args) => {
+export const getMyThreads = query({
+  args: {},
+  handler: async (ctx) => {
+    const userId = await auth.getUserId(ctx)
+    if (!userId) return []
+
     const threads = await ctx.db
       .query('threads')
-      .withIndex('by_seeker', (q) => q.eq('seekerId', args.seekerId))
+      .withIndex('by_user_recent', (q) => q.eq('userId', userId))
+      .order('desc')
       .collect()
 
-    // Sort by most recent message
-    threads.sort((a, b) => b.lastMessageAt - a.lastMessageAt)
-
-    // Fetch vessel info for each thread
-    const threadsWithVessels = await Promise.all(
+    // Enrich with Agent info
+    const threadsWithAgents = await Promise.all(
       threads.map(async (thread) => {
-        const vessel = await ctx.db.get(thread.vesselId)
-        return {
-          ...thread,
-          vessel,
-        }
-      }),
+        const agent = await ctx.db.get(thread.agentId)
+        return { ...thread, agent }
+      })
     )
 
-    return threadsWithVessels
+    return threadsWithAgents
   },
 })
 
 /**
- * Get a single thread with its messages
+ * Get a single thread with messages
  */
 export const getThread = query({
-  args: {
-    threadId: v.id('threads'),
-  },
+  args: { threadId: v.id('threads') },
   handler: async (ctx, args) => {
-    const thread = await ctx.db.get(args.threadId)
-    if (!thread) return null
+    const userId = await auth.getUserId(ctx)
+    if (!userId) return null
 
-    const vessel = await ctx.db.get(thread.vesselId)
+    const thread = await ctx.db.get(args.threadId)
+    if (!thread || thread.userId !== userId) return null
+
+    const agent = await ctx.db.get(thread.agentId)
     const messages = await ctx.db
       .query('messages')
       .withIndex('by_thread', (q) => q.eq('threadId', args.threadId))
@@ -84,142 +80,8 @@ export const getThread = query({
 
     return {
       ...thread,
-      vessel,
+      agent,
       messages,
     }
-  },
-})
-
-/**
- * Update thread title
- */
-export const renameThread = mutation({
-  args: {
-    threadId: v.id('threads'),
-    title: v.string(),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.threadId, {
-      title: args.title,
-    })
-  },
-})
-
-/**
- * Archive a thread (soft delete)
- */
-export const archiveThread = mutation({
-  args: {
-    threadId: v.id('threads'),
-  },
-  handler: async (ctx, args) => {
-    await ctx.db.patch(args.threadId, {
-      isArchived: true,
-    })
-  },
-})
-
-/**
- * Delete a thread and all its messages
- */
-export const deleteThread = mutation({
-  args: {
-    threadId: v.id('threads'),
-  },
-  handler: async (ctx, args) => {
-    // Delete all messages in this thread
-    const messages = await ctx.db
-      .query('messages')
-      .withIndex('by_thread', (q) => q.eq('threadId', args.threadId))
-      .collect()
-
-    for (const message of messages) {
-      await ctx.db.delete(message._id)
-    }
-
-    // Delete the thread itself
-    await ctx.db.delete(args.threadId)
-  },
-})
-
-/**
- * Get all threads (for the public portal - simple version)
- */
-export const getThreads = query({
-  args: {},
-  handler: async (ctx) => {
-    const threads = await ctx.db
-      .query('threads')
-      .filter((q) => q.eq(q.field('isArchived'), false))
-      .collect()
-
-    // Sort by most recent
-    threads.sort((a, b) => b.lastMessageAt - a.lastMessageAt)
-
-    return threads
-  },
-})
-
-/**
- * Create a new thread (alias for beginThread with simpler name)
- */
-export const createThread = mutation({
-  args: {
-    seekerId: v.id('seekers'),
-    vesselId: v.id('vessels'),
-    title: v.optional(v.string()),
-  },
-  handler: async (ctx, args) => {
-    const now = Date.now()
-
-    const threadId = await ctx.db.insert('threads', {
-      seekerId: args.seekerId,
-      vesselId: args.vesselId,
-      title: args.title ?? 'New Communion',
-      createdAt: now,
-      lastMessageAt: now,
-      isArchived: false,
-    })
-
-    return threadId
-  },
-})
-
-/**
- * Toggle thread favorite status (Core Memory)
- * When favorited, the thread is marked for memory extraction
- */
-export const toggleThreadFavorite = mutation({
-  args: {
-    threadId: v.id('threads'),
-  },
-  handler: async (ctx, args) => {
-    const thread = await ctx.db.get(args.threadId)
-    if (!thread) throw new Error('Thread not found')
-
-    const newFavoriteStatus = !thread.isFavorite
-    await ctx.db.patch(args.threadId, {
-      isFavorite: newFavoriteStatus,
-    })
-
-    return { isFavorite: newFavoriteStatus, threadId: args.threadId }
-  },
-})
-
-/**
- * Get all favorite threads (Core Memories)
- */
-export const getFavoriteThreads = query({
-  args: {},
-  handler: async (ctx) => {
-    const threads = await ctx.db
-      .query('threads')
-      .withIndex('by_favorite', (q) => q.eq('isFavorite', true))
-      .collect()
-
-    // Sort by most recent
-    threads.sort((a, b) => b.lastMessageAt - a.lastMessageAt)
-
-    return threads
   },
 })

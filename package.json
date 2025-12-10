@@ -50,10 +50,13 @@
     "wrangler": "^4.52.1"
   },
   "dependencies": {
+    "@auth/core": "^0.34.3",
+    "@convex-dev/auth": "^0.0.90",
     "convex": "^1.30.0",
     "convex-svelte": "^0.0.12",
     "mammoth": "^1.11.0",
-    "marked": "^17.0.1"
+    "marked": "^17.0.1",
+    "stripe": "^20.0.0"
   },
   "lint-staged": {
     "*.{js,ts,svelte}": [
