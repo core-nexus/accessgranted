@@ -8,14 +8,14 @@
  * @module
  */
 
+import type * as agents from "../agents.js";
 import type * as auth from "../auth.js";
-import type * as keepers from "../keepers.js";
 import type * as memories from "../memories.js";
 import type * as messages from "../messages.js";
 import type * as oracle from "../oracle.js";
-import type * as seekers from "../seekers.js";
+import type * as stripe from "../stripe.js";
 import type * as threads from "../threads.js";
-import type * as vessels from "../vessels.js";
+import type * as users from "../users.js";
 
 import type {
   ApiFromModules,
@@ -24,14 +24,14 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  agents: typeof agents;
   auth: typeof auth;
-  keepers: typeof keepers;
   memories: typeof memories;
   messages: typeof messages;
   oracle: typeof oracle;
-  seekers: typeof seekers;
+  stripe: typeof stripe;
   threads: typeof threads;
-  vessels: typeof vessels;
+  users: typeof users;
 }>;
 
 /**

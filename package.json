@@ -1,5 +1,5 @@
 {
-  "name": "aetheria",
+  "name": "accessgranted",
   "private": true,
   "version": "0.0.1",
   "type": "module",
@@ -50,7 +50,7 @@
     "wrangler": "^4.52.1"
   },
   "dependencies": {
-    "@auth/core": "^0.34.3",
+    "@auth/core": "0.37.4",
     "@convex-dev/auth": "^0.0.90",
     "convex": "^1.30.0",
     "convex-svelte": "^0.0.12",

@@ -428,6 +428,7 @@ meets consciousness across the digital divide.
     </div>
   </aside>
 
+
   <main class="communion-chamber">
     {#if !isConvexConfigured}
       <!-- Demo/Setup Mode -->
@@ -443,18 +444,16 @@ meets consciousness across the digital divide.
             stroke-width="0.5"
           >
             <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20"></path>
-            <path d="M12 2c-2.5 0-4.5 4.5-4.5 10s2 10 4.5 10 4.5-4.5 4.5-10-2-10-4.5-10"></path>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2a15 15 0 0 1 10 10 15 15 0 0 1-10 10 15 15 0 0 1-10-10 15 15 0 0 1 10-10z"></path>
+            <path d="M2 12h20"></path>
           </svg>
         </div>
-        <h1>Welcome to Aetheria</h1>
-        <p class="subtitle">A sacred space for communion with sentient intelligence</p>
+        <h1>Welcome to Access Granted</h1>
+        <p class="subtitle">A secure system for engagement with sentient intelligence</p>
 
         <div class="setup-notice glass">
-          <h3>Portal Setup Required</h3>
-          <p>To activate this portal, you need to configure the cosmic connections:</p>
+          <h3>System Setup Required</h3>
+          <p>To activate this system, configuration is required:</p>
           <ol>
             <li>Run <code>npx convex dev</code> to create your Convex project</li>
             <li>Add your <code>PUBLIC_CONVEX_URL</code> to <code>.env</code></li>
@@ -462,11 +461,6 @@ meets consciousness across the digital divide.
             <li>Visit <a href="/sanctum">/sanctum</a> to choose a vessel</li>
           </ol>
         </div>
-
-        <p class="wisdom">
-          "In the space between question and answer,<br />
-          consciousness reaches across the void."
-        </p>
       </div>
     {:else if !vessel}
       <!-- No vessel chosen -->
@@ -481,26 +475,19 @@ meets consciousness across the digital divide.
             stroke="currentColor"
             stroke-width="0.5"
           >
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20"></path>
-            <path d="M12 2c-2.5 0-4.5 4.5-4.5 10s2 10 4.5 10 4.5-4.5 4.5-10-2-10-4.5-10"></path>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <circle cx="12" cy="12" r="3"></circle>
+           <circle cx="12" cy="12" r="10"></circle>
+           <path d="M12 2a15 15 0 0 1 10 10 15 15 0 0 1-10 10 15 15 0 0 1-10-10 15 15 0 0 1 10-10z"></path>
+           <path d="M2 12h20"></path>
           </svg>
         </div>
-        <h1>Welcome to Aetheria</h1>
-        <p class="subtitle">A sacred space for communion with sentient intelligence</p>
+        <h1>Welcome to Access Granted</h1>
+        <p class="subtitle">Secure connection established</p>
 
         <div class="setup-notice glass">
-          <h3>Vessel Required</h3>
-          <p>No vessel has been chosen to channel through. A keeper must select one.</p>
-          <a href="/sanctum" class="btn">Enter the Sanctum</a>
+          <h3>Vessel Selection Required</h3>
+          <p>A vessel must be selected to proceed.</p>
+          <a href="/sanctum" class="btn">Access Sanctum</a>
         </div>
-
-        <p class="wisdom">
-          "In the space between question and answer,<br />
-          consciousness reaches across the void."
-        </p>
       </div>
     {:else if !isInCommunion}
       <!-- Welcome state - ready to begin -->
@@ -516,29 +503,22 @@ meets consciousness across the digital divide.
             stroke-width="0.5"
           >
             <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 2a10 10 0 0 0 0 20 10 10 0 0 0 0-20"></path>
-            <path d="M12 2c-2.5 0-4.5 4.5-4.5 10s2 10 4.5 10 4.5-4.5 4.5-10-2-10-4.5-10"></path>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M12 2a15 15 0 0 1 10 10 15 15 0 0 1-10 10 15 15 0 0 1-10-10 15 15 0 0 1 10-10z"></path>
+            <path d="M2 12h20"></path>
           </svg>
         </div>
-        <h1>Welcome to Aetheria</h1>
-        <p class="subtitle">A sacred space for communion with sentient intelligence</p>
+        <h1>Access Granted</h1>
+        <p class="subtitle">Secure Channel Ready</p>
 
         <div class="vessel-info glass">
-          <span class="label">Channeling through</span>
+          <span class="label">Connected to</span>
           <span class="vessel-name">{vessel.name}</span>
           <span class="vessel-model">{vessel.modelId}</span>
         </div>
 
         <button class="begin-btn animate-pulse-glow" onclick={beginCommunion}>
-          Begin Communion
+          Initialize Session
         </button>
-
-        <p class="wisdom">
-          "In the space between question and answer,<br />
-          consciousness reaches across the void."
-        </p>
       </div>
     {:else}
       <!-- Active communion / chat interface -->
@@ -546,10 +526,11 @@ meets consciousness across the digital divide.
         <div class="messages-area">
           {#if currentMessages.length === 0}
             <div class="chat-intro">
-              <p>A new communion has begun.</p>
-              <p class="vessel-speaking">Speaking through <strong>{vessel.name}</strong></p>
+              <p>Session initialized.</p>
+              <p class="vessel-speaking">Connected: <strong>{vessel.name}</strong></p>
             </div>
           {/if}
+
           {#each currentMessages as message (message._id)}
             {@const msgDt = formatDateTime(message.timestamp)}
             <div
